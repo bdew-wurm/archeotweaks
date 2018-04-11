@@ -1,6 +1,5 @@
 package net.bdew.wurm.archeotweaks;
 
-import com.wurmonline.server.Server;
 import com.wurmonline.server.zones.Zones;
 
 public class Hooks {
@@ -14,7 +13,6 @@ public class Hooks {
     }
 
     public static int bumpTierToSkill(double power, int tier) {
-        Server.getInstance().broadCastAlert(String.format("Power=%.3f tier=%d", power, tier));
         if (power >= 90 && tier < ArcheoTweaksMod.minTierAtPower90) {
             return ArcheoTweaksMod.minTierAtPower90;
         } else if (power >= 70 && tier < ArcheoTweaksMod.minTierAtPower70) {
