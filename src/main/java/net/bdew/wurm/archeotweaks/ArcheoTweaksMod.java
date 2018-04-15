@@ -59,7 +59,7 @@ public class ArcheoTweaksMod implements WurmServerMod, Initable, PreInitable, Co
                     .instrument(new ExprEditor() {
                         @Override
                         public void edit(FieldAccess f) throws CannotCompileException {
-                            if (f.isWriter()) {
+                            if (f.isWriter() && f.getFieldName().startsWith("diff")) {
                                 logInfo(String.format("Replacing list %s creation at %d", f.getFieldName(), f.getLineNumber()));
                                 if (f.getFieldName().equals("diffTrash"))
                                     f.replace("diffTrash=net.bdew.wurm.archeotweaks.Hooks.getLootList(0);");
@@ -96,7 +96,16 @@ public class ArcheoTweaksMod implements WurmServerMod, Initable, PreInitable, Co
                         });
             }
 
-            ctFragUtils.debugWriteFile();
+            classPool.getCtClass("com.wurmonline.server.behaviours.TileBehaviour")
+                    .getMethod("investigateTile", "(Lcom/wurmonline/server/behaviours/Action;Lcom/wurmonline/server/creatures/Creature;Lcom/wurmonline/server/items/Item;IIIIISF)Z")
+                    .instrument(new ExprEditor() {
+                        @Override
+                        public void edit(MethodCall m) throws CannotCompileException {
+                            if (m.getMethodName().equals("getRandomFragmentForSkill")) {
+                                m.replace("net.bdew.wurm.archeotweaks.Hooks.logArch(performer, archSkill, negBonus, tileMax, power); $_=$proceed($1, tileMax < archSkill);");
+                            }
+                        }
+                    });
 
         } catch (Throwable e) {
             logException("Error loading mod", e);
