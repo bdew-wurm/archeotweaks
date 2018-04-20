@@ -125,19 +125,22 @@ public class ArcheoTweaksMod implements WurmServerMod, Initable, PreInitable, Co
                     mInvestigateTile.insertAfter("net.bdew.wurm.archeotweaks.Hooks.endInvestigateHook(performer);");
 
                 mInvestigateTile.instrument(new ExprEditor() {
-                    int dnc = 0, tsd = 0, ta = 0;
+                    int dnc = 0, tsd = 0, ta = 0, sc = 0;
 
                     @Override
                     public void edit(MethodCall m) throws CannotCompileException {
-                        if ((lessJunkOnGoodTiles || extraInfoLogging) && m.getMethodName().equals("getRandomFragmentForSkill")) {
+                        if ((journalSystem || extraInfoLogging) && m.getMethodName().equals("skillCheck") && (sc++ == 1)) {
                             String rep = "";
+                            if (journalSystem)
+                                rep += "$_ = $proceed($1 * net.bdew.wurm.archeotweaks.Hooks.diffMult(performer, possibleTargets), $2, $3, $4, $5);";
                             if (extraInfoLogging)
-                                rep += "net.bdew.wurm.archeotweaks.Hooks.logArch(performer, archSkill, negBonus, tileMax, power);";
-                            if (lessJunkOnGoodTiles)
-                                rep += " $_=$proceed($1, tileMax < archSkill);";
-                            else
-                                rep += "$_=$proceed($$);";
+                                rep += "net.bdew.wurm.archeotweaks.Hooks.logArch(performer, archSkill, negBonus, tileMax, $_);";
                             m.replace(rep);
+                            logInfo(String.format("Hooking skillCheck in investigateTile at %d", m.getLineNumber()));
+                            return;
+                        }
+                        if (lessJunkOnGoodTiles && m.getMethodName().equals("getRandomFragmentForSkill")) {
+                            m.replace("$_=$proceed($1, tileMax < archSkill);");
                             logInfo(String.format("Hooking getRandomFragmentForSkill in investigateTile at %d", m.getLineNumber()));
                             return;
                         }

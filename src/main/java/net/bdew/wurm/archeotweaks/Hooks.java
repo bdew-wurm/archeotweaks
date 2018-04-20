@@ -12,6 +12,7 @@ import net.bdew.wurm.archeotweaks.journal.JournalTools;
 import org.gotti.wurmunlimited.modloader.ReflectionUtil;
 
 import java.util.LinkedList;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class Hooks {
@@ -20,6 +21,7 @@ public class Hooks {
     private static String archLog;
     private static LinkedList<String> journalMessages = new LinkedList<>();
     private static boolean noPaper = false;
+    private static double lastDiffMult = 1;
 
     public static final ConcurrentHashMap<Long, DeadVillage> deadVillages;
 
@@ -61,9 +63,10 @@ public class Hooks {
     }
 
     public static void logArch(Creature perfomer, double archSkill, double negBonus, double tileMax, double power2) {
-        double diff = Math.max(tileMax, archSkill / 5.0);
-        archLog = String.format("Archeology for %s - skill=%.1f negBonus=%.1f tileMax=%.1f power2=%.1f diff=%.1f"
-                , perfomer.getName(), archSkill, negBonus, tileMax, power2, diff);
+        double diff = Math.max(tileMax, archSkill / 5.0) * lastDiffMult;
+        archLog = String.format("Archeology for %s - skill=%.1f negBonus=%.1f tileMax=%.1f power2=%.1f diff=%.1f diffMult=%.3f"
+                , perfomer.getName(), archSkill, negBonus, tileMax, power2, diff, lastDiffMult);
+        lastDiffMult = 1;
     }
 
     public static void respawnArchaeology() {
@@ -176,5 +179,15 @@ public class Hooks {
             return true;
         }
         return false;
+    }
+
+    public static double diffMult(Creature performer, List<DeadVillage> targets) {
+        double maxKnown = 0;
+        for (DeadVillage dv : targets) {
+            Item rep = JournalTools.findLog(performer, dv, false);
+            if (rep != null && rep.getQualityLevel() > maxKnown) maxKnown = rep.getQualityLevel();
+        }
+        lastDiffMult = (1.0 - (maxKnown / 200.0));
+        return lastDiffMult;
     }
 }
