@@ -103,7 +103,7 @@ public class Hooks {
                     locLevel = Math.min(locLevel + 1 + bonus, 7);
                     if (locLevel < 4) {
                         journalMessages.add(String.format("You note some clues to the location of %s in the report, finding more will let you narrow it down further.", deed.getDeedName()));
-                    } else if (locLevel < 6) {
+                    } else if (locLevel < 7) {
                         journalMessages.add(String.format("You note more clues to the location of %s in the report, you think you are close to finding it's true location.", deed.getDeedName()));
                     } else {
                         journalMessages.add(String.format("With the clues you gathered, you now know the exact location of %s, which you write down in the report.", deed.getDeedName()));
