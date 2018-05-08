@@ -6,6 +6,7 @@ import com.wurmonline.server.creatures.Communicator;
 import com.wurmonline.server.creatures.Creature;
 import com.wurmonline.server.epic.EpicServerStatus;
 import com.wurmonline.server.items.Item;
+import com.wurmonline.server.skills.SkillList;
 import com.wurmonline.server.villages.DeadVillage;
 import net.bdew.wurm.archeotweaks.Hooks;
 import org.gotti.wurmunlimited.modsupport.actions.*;
@@ -13,7 +14,9 @@ import org.gotti.wurmunlimited.modsupport.actions.*;
 import java.util.Collections;
 import java.util.List;
 
-import static org.gotti.wurmunlimited.modsupport.actions.ActionPropagation.*;
+import static org.gotti.wurmunlimited.modsupport.actions.ActionPropagation.FINISH_ACTION;
+import static org.gotti.wurmunlimited.modsupport.actions.ActionPropagation.NO_ACTION_PERFORMER_PROPAGATION;
+import static org.gotti.wurmunlimited.modsupport.actions.ActionPropagation.NO_SERVER_PROPAGATION;
 
 public class GetDirectionAction implements ModAction, ActionPerformer, BehaviourProvider {
     private ActionEntry actionEntry;
@@ -86,7 +89,7 @@ public class GetDirectionAction implements ModAction, ActionPerformer, Behaviour
         if (dv.getStartX() > performer.getTileX()) dist = Math.max(dist, dv.getStartX() - performer.getTileX());
         if (dv.getStartY() > performer.getTileY()) dist = Math.max(dist, dv.getStartY() - performer.getTileY());
 
-        if (dist > 50) {
+        if (dist > performer.getSkills().getSkillOrLearn(SkillList.ARCHAEOLOGY).getKnowledge() / 2 + target.getQualityLevel()) {
             if (JournalTools.isLocationKnown(target))
                 comm.sendNormalServerMessage(String.format("%s is %s to the %s.", dv.getDeedName(), dv.getDistanceFrom(performer.getTileX(), performer.getTileY()), dv.getDirectionFrom(performer.getTileX(), performer.getTileY())));
             else
