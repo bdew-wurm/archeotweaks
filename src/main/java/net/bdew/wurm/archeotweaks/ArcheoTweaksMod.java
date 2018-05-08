@@ -8,10 +8,7 @@ import javassist.CtMethod;
 import javassist.expr.ExprEditor;
 import javassist.expr.FieldAccess;
 import javassist.expr.MethodCall;
-import net.bdew.wurm.archeotweaks.journal.CopyAction;
-import net.bdew.wurm.archeotweaks.journal.ExaminePerformer;
-import net.bdew.wurm.archeotweaks.journal.GetDirectionAction;
-import net.bdew.wurm.archeotweaks.journal.JournalItems;
+import net.bdew.wurm.archeotweaks.journal.*;
 import org.gotti.wurmunlimited.modloader.classhooks.HookManager;
 import org.gotti.wurmunlimited.modloader.interfaces.*;
 import org.gotti.wurmunlimited.modsupport.actions.ModActions;
@@ -240,6 +237,7 @@ public class ArcheoTweaksMod implements WurmServerMod, Initable, PreInitable, Co
                 ModActions.registerActionPerformer(new ExaminePerformer());
                 ModActions.registerAction(new CopyAction());
                 ModActions.registerAction(new GetDirectionAction());
+                ModActions.registerAction(new MergeJournalAction());
             }
         } catch (IOException | NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
             throw new RuntimeException(e);

@@ -9,7 +9,7 @@ repositories {
 }
 
 dependencies {
-    compile 'org.gotti.wurmunlimited:server-modlauncher:0.34'
+    compile 'org.gotti.wurmunlimited:server-modlauncher:0.35-beta1'
 }
 
 jar {
