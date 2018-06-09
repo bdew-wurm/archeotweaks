@@ -48,9 +48,9 @@ public class ExaminePerformer implements ActionPerformer {
             }
 
             if (JournalTools.isDisbandKnown(target)) {
-                comm.sendNormalServerMessage(String.format("%s was founded %s ago.", dv.getDeedName(), DeadVillage.getTimeString(dv.getTotalAge() + dv.getTimeSinceDisband(), false)));
+                comm.sendNormalServerMessage(String.format("%s was abandoned for %s.", dv.getDeedName(), DeadVillage.getTimeString(dv.getTimeSinceDisband(), false)));
                 if (JournalTools.isAgeKnown(target)) {
-                    comm.sendNormalServerMessage(String.format("%s was abandoned for %s.", dv.getDeedName(), DeadVillage.getTimeString(dv.getTimeSinceDisband(), false)));
+                    comm.sendNormalServerMessage(String.format("%s was founded %s ago.", dv.getDeedName(), DeadVillage.getTimeString(dv.getTotalAge() + dv.getTimeSinceDisband(), false)));
                 }
             } else if (JournalTools.isAgeKnown(target)) {
                 comm.sendNormalServerMessage(String.format("%s was inhabited for %s.", dv.getDeedName(), DeadVillage.getTimeString(dv.getTotalAge(), false)));
