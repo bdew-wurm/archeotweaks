@@ -127,9 +127,11 @@ public class ArcheoTweaksMod implements WurmServerMod, Initable, PreInitable, Co
                     @Override
                     public void edit(MethodCall m) throws CannotCompileException {
                         if ((journalSystem || extraInfoLogging) && m.getMethodName().equals("skillCheck") && (sc++ == 1)) {
-                            String rep = "";
+                            String rep;
                             if (journalSystem)
-                                rep += "$_ = $proceed($1 * net.bdew.wurm.archeotweaks.Hooks.diffMult(performer, possibleTargets), $2, $3, $4, $5);";
+                                rep = "$_ = $proceed($1 * net.bdew.wurm.archeotweaks.Hooks.diffMult(performer, possibleTargets), $2, $3, $4, $5);";
+                            else
+                                rep = "$_ = $proceed($$);";
                             if (extraInfoLogging)
                                 rep += "net.bdew.wurm.archeotweaks.Hooks.logArch(performer, archSkill, negBonus, tileMax, $_);";
                             m.replace(rep);
@@ -198,7 +200,9 @@ public class ArcheoTweaksMod implements WurmServerMod, Initable, PreInitable, Co
                             });
                 }
 
+                mInvestigateTile.getMethodInfo().rebuildStackMap(classPool);
 
+                classPool.getCtClass("com.wurmonline.server.behaviours.TileBehaviour").debugWriteFile();
             }
 
         } catch (Throwable e) {
