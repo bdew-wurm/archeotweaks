@@ -152,8 +152,6 @@ public class ArcheoTweaksMod implements WurmServerMod, Initable, PreInitable, Co
                                     } else if (dnc < 3) {
                                         m.replace("$_=$proceed(); net.bdew.wurm.archeotweaks.Hooks.journalHook(performer, $0, 1);");
                                         logInfo(String.format("Hooking getDeedName (full) in investigateTile at %d", m.getLineNumber()));
-                                    } else {
-                                        logWarning(String.format("Too many calls to getDeedName in investigateTile at %d ???", m.getLineNumber()));
                                     }
                                     dnc++;
                                     break;
