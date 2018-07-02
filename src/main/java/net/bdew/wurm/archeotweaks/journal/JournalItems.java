@@ -3,6 +3,7 @@ package net.bdew.wurm.archeotweaks.journal;
 import com.wurmonline.server.items.*;
 import com.wurmonline.server.skills.SkillList;
 import com.wurmonline.shared.constants.ItemMaterials;
+import net.bdew.wurm.archeotweaks.Utils;
 import org.gotti.wurmunlimited.modsupport.ItemTemplateBuilder;
 
 import java.io.IOException;
@@ -12,7 +13,9 @@ public class JournalItems {
     public static ItemTemplate logTemplate, journalTemplate;
     public static int logId, journalId;
 
-    public static void register() throws IOException, NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+    public static void register() throws IOException, NoSuchMethodException, InvocationTargetException, IllegalAccessException, NoSuchFieldException {
+        Utils.removeRecipesFor(ItemList.archaeologyJournal);
+
         logTemplate = new ItemTemplateBuilder("bdew.archeo.log")
                 .name("report", "reports", "Archaeology report. If you're seeing this text then something is borked.")
                 .itemTypes(new short[]{
@@ -40,10 +43,10 @@ public class JournalItems {
                         ItemTypes.ITEM_TYPE_USES_SPECIFIED_CONTAINER_VOLUME,
                         ItemTypes.ITEM_TYPE_REPAIRABLE
                 })
-                .imageNumber((short) 1454)
+                .imageNumber((short) 1456)
                 .decayTime(Long.MAX_VALUE)
                 .dimensions(10, 30, 30)
-                .modelName("model.artifact.tomemagic.black.paper.")
+                .modelName("model.container.journal.")
                 .weightGrams(250)
                 .difficulty(5)
                 .primarySkill(SkillList.LEATHERWORKING)
@@ -54,7 +57,7 @@ public class JournalItems {
 
         journalId = journalTemplate.getTemplateId();
 
-        CreationEntryCreator.createAdvancedEntry(SkillList.LEATHERWORKING, ItemList.paperSheet, ItemList.clothString, journalId, false, false, 0.0F, true, false, CreationCategories.WRITING)
+        CreationEntryCreator.createAdvancedEntry(SkillList.LEATHERWORKING, ItemList.book, ItemList.leatherStrip, journalId, false, false, 0.0F, true, false, CreationCategories.WRITING)
                 .addRequirement(new CreationRequirement(1, ItemList.leatherStrip, 2, true));
     }
 }

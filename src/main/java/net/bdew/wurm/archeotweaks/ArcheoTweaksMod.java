@@ -241,7 +241,7 @@ public class ArcheoTweaksMod implements WurmServerMod, Initable, PreInitable, Co
                 ModActions.registerAction(new GetDirectionAction());
                 ModActions.registerAction(new MergeJournalAction());
             }
-        } catch (IOException | NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
+        } catch (IOException | NoSuchMethodException | InvocationTargetException | IllegalAccessException | NoSuchFieldException e) {
             throw new RuntimeException(e);
         }
     }
