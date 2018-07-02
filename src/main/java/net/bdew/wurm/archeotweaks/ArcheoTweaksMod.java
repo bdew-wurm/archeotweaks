@@ -14,12 +14,11 @@ import org.gotti.wurmunlimited.modloader.interfaces.*;
 import org.gotti.wurmunlimited.modsupport.actions.ModActions;
 
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class ArcheoTweaksMod implements WurmServerMod, Initable, PreInitable, Configurable, PlayerMessageListener, ItemTemplatesCreatedListener {
+public class ArcheoTweaksMod implements WurmServerMod, Initable, PreInitable, Configurable, PlayerMessageListener, ItemTemplatesCreatedListener, ServerStartedListener {
     private static final Logger logger = Logger.getLogger("ArcheoTweaks");
 
     public static void logException(String msg, Throwable e) {
@@ -241,8 +240,19 @@ public class ArcheoTweaksMod implements WurmServerMod, Initable, PreInitable, Co
                 ModActions.registerAction(new GetDirectionAction());
                 ModActions.registerAction(new MergeJournalAction());
             }
-        } catch (IOException | NoSuchMethodException | InvocationTargetException | IllegalAccessException | NoSuchFieldException e) {
+        } catch (IOException e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public void onServerStarted() {
+        if (journalSystem) {
+            try {
+                JournalItems.removeVanillaRecipe();
+            } catch (NoSuchFieldException | IllegalAccessException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 }

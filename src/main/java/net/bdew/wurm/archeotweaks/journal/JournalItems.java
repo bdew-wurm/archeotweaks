@@ -7,14 +7,12 @@ import net.bdew.wurm.archeotweaks.Utils;
 import org.gotti.wurmunlimited.modsupport.ItemTemplateBuilder;
 
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 
 public class JournalItems {
     public static ItemTemplate logTemplate, journalTemplate;
     public static int logId, journalId;
 
-    public static void register() throws IOException, NoSuchMethodException, InvocationTargetException, IllegalAccessException, NoSuchFieldException {
-        Utils.removeRecipesFor(ItemList.archaeologyJournal);
+    public static void register() throws IOException {
 
         logTemplate = new ItemTemplateBuilder("bdew.archeo.log")
                 .name("report", "reports", "Archaeology report. If you're seeing this text then something is borked.")
@@ -59,5 +57,9 @@ public class JournalItems {
 
         CreationEntryCreator.createAdvancedEntry(SkillList.LEATHERWORKING, ItemList.book, ItemList.leatherStrip, journalId, false, false, 0.0F, true, false, CreationCategories.WRITING)
                 .addRequirement(new CreationRequirement(1, ItemList.leatherStrip, 2, true));
+    }
+
+    public static void removeVanillaRecipe() throws NoSuchFieldException, IllegalAccessException {
+        Utils.removeRecipesFor(ItemList.archaeologyJournal);
     }
 }
