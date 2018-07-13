@@ -174,6 +174,10 @@ public class ArcheoTweaksMod implements WurmServerMod, Initable, PreInitable, Co
                                         logInfo(String.format("Hooking getTotalAge in investigateTile at %d", m.getLineNumber()));
                                     }
                                     break;
+                                case "toString":
+                                    m.replace("$_=$proceed().replace(\"If you had an archaeology journal with a blank report in it you could record your findings.\",\"\");");
+                                    logInfo(String.format("Hooking message toString in investigateTile at %d", m.getLineNumber()));
+                                    break;
                             }
                         }
 
