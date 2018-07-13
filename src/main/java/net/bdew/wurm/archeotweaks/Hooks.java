@@ -128,7 +128,7 @@ public class Hooks {
                 break;
             case 3:
                 if (!JournalTools.isFounderKnown(report)) {
-                    journalMessages.add(String.format("You add the name of %s, the founder of %s to the report.", deed.getMayorName(), deed.getDeedName()));
+                    journalMessages.add(String.format("You add the name of %s, the founder of %s to the report.", deed.getFounderName(), deed.getDeedName()));
                     JournalTools.setFounderKnown(report);
                     added = true;
                 }

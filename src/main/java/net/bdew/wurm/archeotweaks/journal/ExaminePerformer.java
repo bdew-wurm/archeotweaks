@@ -43,7 +43,7 @@ public class ExaminePerformer implements ActionPerformer {
                     comm.sendNormalServerMessage(String.format("%s was founded by %s.", dv.getDeedName(), dv.getFounderName()));
                 }
                 if (JournalTools.isLastMayorKnown(target)) {
-                    comm.sendNormalServerMessage(String.format("The last known mayor was %s.", dv.getFounderName()));
+                    comm.sendNormalServerMessage(String.format("The last known mayor was %s.", dv.getMayorName()));
                 }
             }
 
