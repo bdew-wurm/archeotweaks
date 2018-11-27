@@ -78,7 +78,7 @@ public class MergeJournalAction implements ModAction, ActionPerformer, Behaviour
     private Map<Long, Item> getReports(Item journal) {
         return journal.getItems().stream()
                 .filter(i -> i.getTemplateId() == JournalItems.logId)
-                .collect(Collectors.toMap(Item::getData, Function.identity()));
+                .collect(Collectors.toMap(Item::getData, Function.identity(), (a, b) -> a));
     }
 
     private MergeInfo calculateActions(Item source, Item target) {
