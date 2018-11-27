@@ -9,10 +9,10 @@ import com.wurmonline.server.behaviours.Actions;
 import com.wurmonline.server.creatures.Creature;
 import com.wurmonline.server.items.Item;
 import com.wurmonline.server.items.ItemFactory;
-import com.wurmonline.server.items.ItemList;
 import com.wurmonline.server.items.NoSuchTemplateException;
 import com.wurmonline.server.skills.SkillList;
 import net.bdew.wurm.archeotweaks.ArcheoTweaksMod;
+import net.bdew.wurm.archeotweaks.Utils;
 import org.gotti.wurmunlimited.modsupport.actions.ActionPerformer;
 import org.gotti.wurmunlimited.modsupport.actions.BehaviourProvider;
 import org.gotti.wurmunlimited.modsupport.actions.ModAction;
@@ -110,10 +110,8 @@ public class MergeJournalAction implements ModAction, ActionPerformer, Behaviour
     }
 
     private Item findPaper(Creature performer) {
-        for (Item i : performer.getInventory().getAllItems(false)) {
-            if (i.getTemplateId() == ItemList.paperSheet) return i;
-        }
-        return null;
+        return Arrays.stream(performer.getInventory().getAllItems(false))
+                .filter(Utils::isCleanPaper).findFirst().orElse(null);
     }
 
     private boolean doNextAction(Creature performer, Item source, Item target, MergeInfo data) {

@@ -7,10 +7,10 @@ import com.wurmonline.server.Servers;
 import com.wurmonline.server.creatures.Creature;
 import com.wurmonline.server.items.Item;
 import com.wurmonline.server.items.ItemFactory;
-import com.wurmonline.server.items.ItemList;
 import com.wurmonline.server.items.NoSuchTemplateException;
 import com.wurmonline.server.villages.DeadVillage;
 import net.bdew.wurm.archeotweaks.ArcheoTweaksMod;
+import net.bdew.wurm.archeotweaks.Utils;
 
 public class JournalTools {
     public static Item findLog(Creature owner, DeadVillage dv, boolean create) {
@@ -20,7 +20,7 @@ public class JournalTools {
             for (Item i : owner.getInventory().getAllItems(false)) {
                 if (i.getTemplateId() == JournalItems.logId && i.getData() == dv.getDeedId())
                     return i;
-                else if (paper == null && i.getTemplateId() == ItemList.paperSheet)
+                else if (paper == null && Utils.isCleanPaper(i))
                     paper = i;
             }
             if (!create || paper == null) return null;

@@ -2,7 +2,6 @@ package net.bdew.wurm.archeotweaks;
 
 import com.wurmonline.server.creatures.Creature;
 import com.wurmonline.server.items.Item;
-import com.wurmonline.server.items.ItemList;
 import com.wurmonline.server.skills.SkillList;
 import com.wurmonline.server.villages.DeadVillage;
 import com.wurmonline.server.villages.Villages;
@@ -174,9 +173,11 @@ public class Hooks {
     }
 
     public static boolean blockMove(Item source, Item target, Creature performer) {
-        if (target.getTemplateId() == JournalItems.journalId && source.getTemplateId() != ItemList.paperSheet && source.getTemplateId() != JournalItems.logId) {
-            performer.getCommunicator().sendNormalServerMessage("Only reports and clean paper sheets go into the journal.");
-            return true;
+        if (target.getTemplateId() == JournalItems.journalId) {
+            if (!Utils.isCleanPaper(source) && source.getTemplateId() != JournalItems.logId) {
+                performer.getCommunicator().sendNormalServerMessage("Only reports and clean paper sheets go into the journal.");
+                return true;
+            }
         }
         return false;
     }

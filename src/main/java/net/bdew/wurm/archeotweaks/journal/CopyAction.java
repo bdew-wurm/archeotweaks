@@ -8,9 +8,9 @@ import com.wurmonline.server.behaviours.ActionEntry;
 import com.wurmonline.server.creatures.Creature;
 import com.wurmonline.server.items.Item;
 import com.wurmonline.server.items.ItemFactory;
-import com.wurmonline.server.items.ItemList;
 import com.wurmonline.server.items.NoSuchTemplateException;
 import net.bdew.wurm.archeotweaks.ArcheoTweaksMod;
+import net.bdew.wurm.archeotweaks.Utils;
 import org.gotti.wurmunlimited.modsupport.actions.ActionPerformer;
 import org.gotti.wurmunlimited.modsupport.actions.BehaviourProvider;
 import org.gotti.wurmunlimited.modsupport.actions.ModAction;
@@ -19,7 +19,9 @@ import org.gotti.wurmunlimited.modsupport.actions.ModActions;
 import java.util.Collections;
 import java.util.List;
 
-import static org.gotti.wurmunlimited.modsupport.actions.ActionPropagation.*;
+import static org.gotti.wurmunlimited.modsupport.actions.ActionPropagation.FINISH_ACTION;
+import static org.gotti.wurmunlimited.modsupport.actions.ActionPropagation.NO_ACTION_PERFORMER_PROPAGATION;
+import static org.gotti.wurmunlimited.modsupport.actions.ActionPropagation.NO_SERVER_PROPAGATION;
 
 public class CopyAction implements ModAction, ActionPerformer, BehaviourProvider {
     private ActionEntry actionEntry;
@@ -50,7 +52,7 @@ public class CopyAction implements ModAction, ActionPerformer, BehaviourProvider
     public boolean canUse(Creature performer, Item source, Item target) {
         return (performer.isPlayer() && source != null && target != null &&
                 source.getTemplateId() == JournalItems.logId && source.getTopParent() == performer.getInventory().getWurmId() &&
-                target.getTemplateId() == ItemList.paperSheet && target.getTopParent() == performer.getInventory().getWurmId());
+                Utils.isCleanPaper(target) && target.getTopParent() == performer.getInventory().getWurmId());
     }
 
     @Override

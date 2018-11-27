@@ -1,7 +1,6 @@
 package net.bdew.wurm.archeotweaks;
 
-import com.wurmonline.server.items.CreationEntry;
-import com.wurmonline.server.items.CreationMatrix;
+import com.wurmonline.server.items.*;
 import org.gotti.wurmunlimited.modloader.ReflectionUtil;
 
 import java.util.List;
@@ -18,5 +17,11 @@ public class Utils {
         advancedEntries.remove(ent.getObjectCreated());
         matrix.get(ent.getObjectTarget()).remove(ent);
         simpleEntries.get(ent.getObjectCreated()).remove(ent);
+    }
+
+    public static boolean isCleanPaper(Item item) {
+        if (item.getTemplateId() != ItemList.paperSheet || item.getAuxData() != 0) return false;
+        InscriptionData ins = item.getInscription();
+        return ins == null || !ins.hasBeenInscribed();
     }
 }
