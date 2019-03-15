@@ -1,26 +1,40 @@
 package net.bdew.wurm.archeotweaks;
 
+import com.wurmonline.server.NoSuchItemException;
+import com.wurmonline.server.NoSuchPlayerException;
+import com.wurmonline.server.Server;
 import com.wurmonline.server.creatures.Creature;
+import com.wurmonline.server.creatures.NoSuchCreatureException;
+import com.wurmonline.server.items.FragmentUtilities;
 import com.wurmonline.server.items.Item;
+import com.wurmonline.server.players.AchievementList;
+import com.wurmonline.server.players.Player;
 import com.wurmonline.server.skills.SkillList;
 import com.wurmonline.server.villages.DeadVillage;
 import com.wurmonline.server.villages.Villages;
+import com.wurmonline.server.zones.NoSuchZoneException;
 import com.wurmonline.server.zones.Zones;
 import net.bdew.wurm.archeotweaks.journal.JournalItems;
 import net.bdew.wurm.archeotweaks.journal.JournalTools;
 import org.gotti.wurmunlimited.modloader.ReflectionUtil;
+import org.gotti.wurmunlimited.modsupport.properties.ModPlayerProperties;
+import org.gotti.wurmunlimited.modsupport.properties.Property;
 
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 public class Hooks {
     static private AdvancedItemIdParser idParser;
+
+    static private final String CACHE_POWER_PROP = "bdew.archeotweaks.cachepower";
 
     private static String archLog;
     private static LinkedList<String> journalMessages = new LinkedList<>();
     private static boolean noPaper = false;
     private static double lastDiffMult = 1;
+    private static double cachePowerAdd = -1;
 
     public static final ConcurrentHashMap<Long, DeadVillage> deadVillages;
 
@@ -36,7 +50,7 @@ public class Hooks {
 
     public static int[] getLootList(int tier) {
         if (idParser == null) idParser = new AdvancedItemIdParser();
-        int[] list = idParser.parseListSafe(ArcheoTweaksMod.tierLists[tier]);
+        int[] list = idParser.parseListSafe(tier == -1 ? ArcheoTweaksMod.cacheFragments : ArcheoTweaksMod.tierLists[tier]);
         ArcheoTweaksMod.logInfo(String.format("Prepared tier %d list - %d entries", tier, list.length));
         return list;
     }
@@ -157,6 +171,10 @@ public class Hooks {
         }
     }
 
+    public static void cachePowerHook(double power) {
+        cachePowerAdd = power;
+    }
+
     public static void endInvestigateHook(Creature performer) {
         if (archLog != null) {
             ArcheoTweaksMod.logInfo(archLog + " - FAIL");
@@ -169,6 +187,57 @@ public class Hooks {
         if (noPaper) {
             performer.getCommunicator().sendNormalServerMessage("You would be able to record some findings if you had a sheet of paper.");
             noPaper = false;
+        }
+        if (cachePowerAdd > 0 && ArcheoTweaksMod.cacheTotalPower > 0) {
+            List<DeadVillage> hasReports =
+                    Villages.getDeadVillagesFor(performer.getTileX(), performer.getTileY()).stream()
+                            .filter(i -> {
+                                Item log = JournalTools.findLog(performer, i, false);
+                                return log != null && JournalTools.isFullReport(log);
+                            }).collect(Collectors.toList());
+            if (!hasReports.isEmpty()) {
+                DeadVillage dv = hasReports.get(Server.rand.nextInt(hasReports.size()));
+                List<Property> powers = ModPlayerProperties.getInstance().getPlayerProperties(CACHE_POWER_PROP, performer.getWurmId());
+                double power = powers.stream().mapToDouble(Property::getNumValue).max().orElse(0) + cachePowerAdd;
+
+                if (!powers.isEmpty())
+                    ModPlayerProperties.getInstance().deletePlayerProperties(CACHE_POWER_PROP, performer.getWurmId());
+
+                if (ArcheoTweaksMod.extraInfoLogging)
+                    ArcheoTweaksMod.logInfo(String.format("Cache power for %s - added: %.1f - now: %.1f - needed: %.1f", performer.getName(), cachePowerAdd, power, ArcheoTweaksMod.cacheTotalPower));
+
+                if (power >= ArcheoTweaksMod.cacheTotalPower) {
+                    if (ArcheoTweaksMod.extraInfoLogging)
+                        ArcheoTweaksMod.logInfo(String.format("Spawning cache for %s", performer.getName()));
+                    final Item cache = FragmentUtilities.createVillageCache((Player) performer, JournalTools.findLog(performer, dv, false), dv, performer.getSkills().getSkillOrLearn(10069));
+                    if (cache != null) {
+                        performer.getCommunicator().sendAlertServerMessage(String.format("You pull a %s out of the ground!", cache.getName()), (byte) 2);
+                        Server.getInstance().broadCastAction(performer.getName() + " pulls a " + cache.getName() + " from the ground.", performer, 5);
+                        performer.achievement(AchievementList.ACH_ARCH_CACHE);
+                        try {
+                            cache.putItemInfrontof(performer);
+                        } catch (NoSuchCreatureException | NoSuchZoneException | NoSuchPlayerException | NoSuchItemException e) {
+                            ArcheoTweaksMod.logException("Error placing cache", e);
+                            performer.getCommunicator().sendNormalServerMessage("An error occurred. Please try again later or contact /support.", (byte) 2);
+                            ModPlayerProperties.getInstance().setPlayerProperty(CACHE_POWER_PROP, performer.getWurmId(), (float) power);
+                        }
+                    } else {
+                        performer.getCommunicator().sendNormalServerMessage("An error occurred. Please try again later or contact /support.", (byte) 2);
+                        ModPlayerProperties.getInstance().setPlayerProperty(CACHE_POWER_PROP, performer.getWurmId(), (float) power);
+                    }
+                } else {
+                    if (power >= ArcheoTweaksMod.cacheTotalPower * 0.75f) {
+                        performer.getCommunicator().sendNormalServerMessage("You feel like you're getting close to finding a cache!");
+                    } else if (power >= ArcheoTweaksMod.cacheTotalPower * 0.333f) {
+                        performer.getCommunicator().sendNormalServerMessage("You feel like you're making progress to finding a cache!");
+                    } else {
+                        performer.getCommunicator().sendNormalServerMessage("You feel like you're on the right path to finding a cache!");
+                    }
+                    ModPlayerProperties.getInstance().setPlayerProperty(CACHE_POWER_PROP, performer.getWurmId(), (float) power);
+                }
+
+                cachePowerAdd = -1f;
+            }
         }
     }
 

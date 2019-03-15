@@ -37,10 +37,12 @@ public class ArcheoTweaksMod implements WurmServerMod, Initable, PreInitable, Co
     }
 
     public static String[] tierLists = new String[8];
+    public static String cacheFragments;
     public static int minTierAtPower50, minTierAtPower70, minTierAtPower90;
     public static boolean lessJunkOnGoodTiles = false;
     public static boolean extraInfoLogging = false;
     public static boolean journalSystem = false;
+    public static float cacheTotalPower;
 
     @Override
     public void configure(Properties properties) {
@@ -48,6 +50,9 @@ public class ArcheoTweaksMod implements WurmServerMod, Initable, PreInitable, Co
             tierLists[i] = properties.getProperty("tier" + i);
             logInfo(String.format("tier%d = %s", i, tierLists[i]));
         }
+
+        cacheFragments = properties.getProperty("cache");
+        logInfo(String.format("cache = %s", cacheFragments));
 
         minTierAtPower50 = Integer.parseInt(properties.getProperty("minTierAtPower50", "-1"));
         minTierAtPower70 = Integer.parseInt(properties.getProperty("minTierAtPower70", "-1"));
@@ -57,12 +62,18 @@ public class ArcheoTweaksMod implements WurmServerMod, Initable, PreInitable, Co
         extraInfoLogging = Boolean.parseBoolean(properties.getProperty("extraInfoLogging", "false"));
         journalSystem = Boolean.parseBoolean(properties.getProperty("journalSystem", "false"));
 
+        if (journalSystem)
+            cacheTotalPower = Float.parseFloat(properties.getProperty("cacheTotalPower", "0"));
+        else
+            cacheTotalPower = 0;
+
         logInfo("minTierAtPower50 = " + minTierAtPower50);
         logInfo("minTierAtPower70 = " + minTierAtPower70);
         logInfo("minTierAtPower90 = " + minTierAtPower90);
         logInfo("lessJunkOnGoodTiles = " + lessJunkOnGoodTiles);
         logInfo("extraInfoLogging = " + extraInfoLogging);
         logInfo("journalSystem = " + journalSystem);
+        logInfo("cacheTotalPower = " + cacheTotalPower);
     }
 
     @Override
@@ -93,6 +104,8 @@ public class ArcheoTweaksMod implements WurmServerMod, Initable, PreInitable, Co
                                     f.replace("diff60_70=net.bdew.wurm.archeotweaks.Hooks.getLootList(6);");
                                 else if (f.getFieldName().equals("diff70_80"))
                                     f.replace("diff70_80=net.bdew.wurm.archeotweaks.Hooks.getLootList(7);");
+                                else if (f.getFieldName().equals("justStatues"))
+                                    f.replace("diff70_80=net.bdew.wurm.archeotweaks.Hooks.getLootList(-1);");
                             }
                         }
                     });
@@ -127,21 +140,29 @@ public class ArcheoTweaksMod implements WurmServerMod, Initable, PreInitable, Co
                     public void edit(MethodCall m) throws CannotCompileException {
                         if ((journalSystem || extraInfoLogging) && m.getMethodName().equals("skillCheck") && (sc++ == 1)) {
                             String rep;
+
                             if (journalSystem)
                                 rep = "$_ = $proceed($1 * net.bdew.wurm.archeotweaks.Hooks.diffMult(performer, possibleTargets), $2, $3, $4, $5);";
                             else
                                 rep = "$_ = $proceed($$);";
+
+                            if (cacheTotalPower > 0)
+                                rep += "net.bdew.wurm.archeotweaks.Hooks.cachePowerHook($_);";
+
                             if (extraInfoLogging)
                                 rep += "net.bdew.wurm.archeotweaks.Hooks.logArch(performer, archSkill, negBonus, tileMax, $_);";
+
                             m.replace(rep);
                             logInfo(String.format("Hooking skillCheck in investigateTile at %d", m.getLineNumber()));
                             return;
                         }
+
                         if (lessJunkOnGoodTiles && m.getMethodName().equals("getRandomFragmentForSkill")) {
                             m.replace("$_=$proceed($1, tileMax < archSkill);");
                             logInfo(String.format("Hooking getRandomFragmentForSkill in investigateTile at %d", m.getLineNumber()));
                             return;
                         }
+
                         if (journalSystem) {
                             switch (m.getMethodName()) {
                                 case "getDeedName":
